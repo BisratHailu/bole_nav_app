@@ -27,7 +27,6 @@ class PostApiEndpoints extends PostApi {
         ),
       );
 
-      print(response.data);
       if (response.statusCode == 200) {
         var data = response.data;
         var decodedData = data as List;

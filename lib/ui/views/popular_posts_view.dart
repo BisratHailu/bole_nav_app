@@ -1,6 +1,7 @@
 import 'package:bole_nav_app/core/view_models/page_manager_model.dart';
 import 'package:bole_nav_app/core/view_models/post_model.dart';
 import 'package:bole_nav_app/ui/shared/post_cards/reusable_popular_post_card.dart';
+import 'package:bole_nav_app/ui/shared/shimmer/popular_post_shimmer.dart';
 import 'package:bole_nav_app/ui/utils/color.dart';
 import 'package:bole_nav_app/ui/widgets/reusable_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -27,14 +28,15 @@ class PopularPostsView extends StatelessWidget {
     );
   }
 
-  Widget _buildBody() =>  BaseView<PostModel>(
-    onModelReady: (model) async => await model.intPosts(),
-    builder: (context, postModel, _) => RefreshIndicator(
-      color: BoleNavColor.primaryColor,
-      backgroundColor: BoleNavColor.white,
-      onRefresh: () async {
-        await postModel.loadPosts();
-      },child: ListView(
+  Widget _buildBody() => BaseView<PostModel>(
+        onModelReady: (model) async => await model.intPosts(),
+        builder: (context, postModel, _) => RefreshIndicator(
+          color: BoleNavColor.primaryColor,
+          backgroundColor: BoleNavColor.white,
+          onRefresh: () async {
+            await postModel.loadPosts();
+          },
+          child: ListView(
             children: [
               _buildAppBar(),
               const SizedBox(
@@ -43,50 +45,49 @@ class PopularPostsView extends StatelessWidget {
               _buildBanner(),
               _buildPopularPostsHeaderTitle(),
               const SizedBox(height: 10),
-              _buildPosts(context,postModel),
+              _buildPosts(context, postModel),
             ],
           ),
-    ),
-  );
+        ),
+      );
 
   Widget _buildAppBar() => const ReusableAppBar();
 
-  Widget _buildPosts(BuildContext context,PostModel postModel) => postModel.getState<PostsViewState>() == PostsViewState.busy
-            ? ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                scrollDirection: Axis.vertical,
-                itemCount: 10,
-                itemBuilder: (context, index) => Padding(
-                  padding: EdgeInsets.only(top: (index == 0) ? 15 : 0),
-                  child: Container(),
-                ),
-              )
-            : postModel.posts.isEmpty
-                ? ListView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      Center(
-                        child: BoleNavConst.kNoStatus(context),
-                      ),
-                    ],
-                  )
-                : ListView.builder(
-                    itemCount: postModel.posts.length,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) => Padding(
-                      padding: EdgeInsets.only(
-                        bottom:
-                            (index == postModel.posts.length - 1) ? 75 : 0,
-                        top: (index == 0) ? 15 : 0,
-                      ),
-                      child: ReusablePopularPostCard(
-                          post: postModel.posts[index]),
+  Widget _buildPosts(BuildContext context, PostModel postModel) =>
+      postModel.getState<PostsViewState>() == PostsViewState.busy
+          ? ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              scrollDirection: Axis.vertical,
+              itemCount: 10,
+              itemBuilder: (context, index) => Padding(
+                padding: EdgeInsets.only(top: (index == 0) ? 15 : 0),
+                child: const PopularPostShimmer(),
+              ),
+            )
+          : postModel.posts.isEmpty
+              ? ListView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    Center(
+                      child: BoleNavConst.kNoStatus(context),
                     ),
-
-      );
+                  ],
+                )
+              : ListView.builder(
+                  itemCount: postModel.posts.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) => Padding(
+                    padding: EdgeInsets.only(
+                      bottom: (index == postModel.posts.length - 1) ? 75 : 0,
+                      top: (index == 0) ? 15 : 0,
+                    ),
+                    child:
+                        ReusablePopularPostCard(post: postModel.posts[index]),
+                  ),
+                );
 
   Widget _buildBanner() {
     return SizedBox(
